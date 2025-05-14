@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "kernelspec": {
+      "name": "python",
+      "display_name": "Python (Pyodide)",
+      "language": "python"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "python",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.8"
+    }
+  },
+  "nbformat_minor": 5,
+  "nbformat": 4,
+  "cells": [
+    {
+      "id": "9fe35ed8-6000-4765-b948-f4d5956045d1",
+      "cell_type": "code",
+      "source": "# Librerías\nimport pandas as pd\nfrom sklearn.datasets import load_breast_cancer\nfrom sklearn.feature_selection import mutual_info_classif, SelectKBest, chi2\n\n# Cargar y preparar datos\ndata = load_breast_cancer()\ndf = pd.DataFrame(data.data, columns=data.feature_names)\ndf['target'] = data.target\nX = df.drop('target', axis=1)\ny = df['target']\n\n# Información mutua\nmi = mutual_info_classif(X, y)\nmi_series = pd.Series(mi, index=X.columns).sort_values(ascending=False)\n\nmi_series.plot(kind='bar', figsize=(10,6))\nplt.title(\"Ganancia de información mutua\")\nplt.show()\n\n# Chi2\nchi2_selector = SelectKBest(score_func=chi2, k='all')\nchi2_selector.fit(X, y)\nchi2_scores = pd.Series(chi2_selector.scores_, index=X.columns).sort_values(ascending=False)\n\nchi2_scores.plot(kind='bar', color='orange', figsize=(10,6))\nplt.title(\"Puntajes Chi2\")\nplt.show()\n\n# Selección de las 10 mejores\ntop_features = mi_series.head(10).index\nX_selected = X[top_features]\n\n# Guardar conjunto reducido para los siguientes notebooks\nX_selected.to_csv(\"X_selected.csv\", index=False)\ny.to_csv(\"y.csv\", index=False)\n",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [],
+      "execution_count": null
+    }
+  ]
+}
